@@ -1,35 +1,56 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useEffect, useState } from "react";
+import { ethers } from "ethers";
+import Counter from "./contracts/Counter.json";
+
+const CONTRACT_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [count, setCount] = useState<number | null>(null);
+  const [contract, setContract] = useState<ethers.Contract | null>(null);
+
+  useEffect(() => {
+    async function loadContract() {
+      if (!window.ethereum) {
+        alert("Install MetaMask");
+        return;
+      }
+
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      await provider.send("eth_requestAccounts", []);
+      const signer = await provider.getSigner();
+
+      const counterContract = new ethers.Contract(
+        CONTRACT_ADDRESS,
+        Counter.abi,
+        signer,
+      );
+
+      const value = await counterContract.x();
+      setCount(Number(value));
+      setContract(counterContract);
+    }
+
+    loadContract();
+  }, []);
+
+  async function handleIncrement() {
+    if (!contract) return;
+
+    const tx = await contract.inc();
+    await tx.wait();
+
+    const updated = await contract.x();
+    setCount(Number(updated));
+  }
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <div>
+      <h1>Counter: {count ?? "Loading..."}</h1>
+      <button onClick={handleIncrement} disabled={!contract}>
+        Increment
+      </button>
+    </div>
+  );
 }
 
-export default App
+export default App;
