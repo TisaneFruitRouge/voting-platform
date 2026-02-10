@@ -23,7 +23,7 @@ contract Ballot {
     }
 
     function vote(address voter, string calldata proposal) public {
-        require(alreadyVoted[voter], "Voter already voted");
+        require(!alreadyVoted[voter], "Voter already voted");
         require(isInProposals(proposal), "Wrong proposal");
         require(hasEnded == false, "Vote has already ended");
 

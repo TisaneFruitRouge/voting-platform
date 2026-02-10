@@ -1,42 +1,49 @@
 #root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 2rem;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+.ballot h1 {
+    margin-bottom: 1rem;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.status {
+    color: #888;
+    margin-bottom: 1rem;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+.voting-section {
+    margin-bottom: 2rem;
 }
 
-.card {
-  padding: 2em;
+.proposal-list {
+    list-style: none;
+    padding: 0;
+    margin: 1rem 0;
 }
 
-.read-the-docs {
-  color: #888;
+.proposal-list li {
+    margin: 0.5rem 0;
+}
+
+.proposal-list label {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.ended {
+    font-weight: bold;
+}
+
+.end-vote-btn {
+    margin-top: 1rem;
+    background-color: #c0392b;
+    color: white;
+}
+
+.end-vote-btn:hover {
+    border-color: #e74c3c;
 }
