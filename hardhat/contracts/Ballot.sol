@@ -6,7 +6,7 @@ contract Ballot {
 
     string[] public proposals;
 
-    mapping(string => uint) votes;
+    mapping(uint => uint) votes;
     mapping(address => bool) alreadyVoted;
 
     string[] finalResults;
@@ -18,16 +18,19 @@ contract Ballot {
         proposals = _proposals;
 
         for (uint i = 0; i < proposals.length; i++) {
-            votes[proposals[i]] = 0;
+            votes[i] = 0;
         }
     }
 
-    function vote(address voter, string calldata proposal) public {
+    function vote(uint proposalIndex) public {
+        address voter = msg.sender;
+
         require(!alreadyVoted[voter], "Voter already voted");
-        require(isInProposals(proposal), "Wrong proposal");
+        require(proposalIndex < proposals.length, "Invalid proposal index");
         require(hasEnded == false, "Vote has already ended");
 
-        votes[proposal]++;
+        votes[proposalIndex]++;
+        alreadyVoted[voter] = true;
     }
 
     function endVote() public {
@@ -43,30 +46,21 @@ contract Ballot {
 
         for (uint i = 0; i < proposals.length; i++) {
             string memory proposal = proposals[i];
-            uint numberOfVotes = votes[proposal];
+            uint numberOfVotes = votes[i];
 
-            if (numberOfVotes == 0) continue;
-            if (numberOfVotes == highestVoteCount) {
+            if (numberOfVotes == 0) {
+                continue;
+            } else if (numberOfVotes == highestVoteCount) {
                 finalResults.push(proposal);
-            }
-            if (numberOfVotes > highestVoteCount) {
+            } else if (numberOfVotes > highestVoteCount) {
                 finalResults = [proposal];
+                highestVoteCount = numberOfVotes;
             }
         }
     }
 
-    function compareStrings(
-        string memory a,
-        string memory b
-    ) public pure returns (bool) {
-        return (keccak256(abi.encodePacked((a))) ==
-            keccak256(abi.encodePacked((b))));
-    }
-
-    function isInProposals(string calldata p) internal view returns (bool) {
-        for (uint256 i = 0; i < proposals.length; i++) {
-            if (compareStrings(proposals[i], p)) return true;
-        }
-        return false;
+    function getResults() public view returns (string[] memory) {
+        require(hasEnded, "Vote has not ended yet");
+        return finalResults;
     }
 }
