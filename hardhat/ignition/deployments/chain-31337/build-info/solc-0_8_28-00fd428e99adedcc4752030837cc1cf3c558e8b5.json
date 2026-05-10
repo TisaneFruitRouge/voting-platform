@@ -1,0 +1,39 @@
+{
+  "_format": "hh3-sol-build-info-1",
+  "id": "solc-0_8_28-00fd428e99adedcc4752030837cc1cf3c558e8b5",
+  "solcVersion": "0.8.28",
+  "solcLongVersion": "0.8.28+commit.7893614a",
+  "userSourceNameMap": {
+    "contracts/Ballot.sol": "project/contracts/Ballot.sol"
+  },
+  "input": {
+    "language": "Solidity",
+    "settings": {
+      "evmVersion": "cancun",
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "outputSelection": {
+        "*": {
+          "": [
+            "ast"
+          ],
+          "*": [
+            "abi",
+            "evm.bytecode",
+            "evm.deployedBytecode",
+            "evm.methodIdentifiers",
+            "metadata"
+          ]
+        }
+      },
+      "remappings": []
+    },
+    "sources": {
+      "project/contracts/Ballot.sol": {
+        "content": "// SPDX-License-Identifier: UNLICENSED\npragma solidity ^0.8.28;\n\ncontract Ballot {\n    address public initiator;\n\n    string[] public proposals;\n\n    mapping(string => uint) votes;\n    mapping(address => bool) alreadyVoted;\n\n    string[] finalResults;\n\n    bool hasEnded;\n\n    constructor(address _initiator, string[] memory _proposals) {\n        initiator = _initiator;\n        proposals = _proposals;\n\n        for (uint i = 0; i < proposals.length; i++) {\n            votes[proposals[i]] = 0;\n        }\n    }\n\n    function vote(address voter, string calldata proposal) public {\n        require(!alreadyVoted[voter], \"Voter already voted\");\n        require(isInProposals(proposal), \"Wrong proposal\");\n        require(hasEnded == false, \"Vote has already ended\");\n\n        votes[proposal]++;\n    }\n\n    function endVote() public {\n        require(hasEnded == false, \"Vote has already ended\");\n        require(msg.sender == initiator, \"Only the initiator can end the vote\");\n\n        countVotes();\n        hasEnded = true;\n    }\n\n    function countVotes() internal {\n        uint highestVoteCount = 0;\n\n        for (uint i = 0; i < proposals.length; i++) {\n            string memory proposal = proposals[i];\n            uint numberOfVotes = votes[proposal];\n\n            if (numberOfVotes == 0) continue;\n            if (numberOfVotes == highestVoteCount) {\n                finalResults.push(proposal);\n            }\n            if (numberOfVotes > highestVoteCount) {\n                finalResults = [proposal];\n            }\n        }\n    }\n\n    function compareStrings(\n        string memory a,\n        string memory b\n    ) public pure returns (bool) {\n        return (keccak256(abi.encodePacked((a))) ==\n            keccak256(abi.encodePacked((b))));\n    }\n\n    function isInProposals(string calldata p) internal view returns (bool) {\n        for (uint256 i = 0; i < proposals.length; i++) {\n            if (compareStrings(proposals[i], p)) return true;\n        }\n        return false;\n    }\n}\n"
+      }
+    }
+  }
+}
